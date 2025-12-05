@@ -1,6 +1,5 @@
 <p align="center">
-  <img src="[![Demo of Yay GUI Manager](https://i.imgur.com/YourImageID.gif)](https://i.imgur.com/YourImageID.gif)
-" alt="Yay GUI Manager logo" width="180"/>
+  <img src="desktop/yay-gui.png" alt="Yay GUI Manager logo" width="180"/>
 </p>
 
 <h1 align="center">Yay GUI Manager – Rebuilt</h1>
