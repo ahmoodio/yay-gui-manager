@@ -24,12 +24,20 @@ Option B — Manual install (Arch / Manjaro / EndeavourOS / CachyOS):
 - `sudo pacman -Syu --needed python python-pip python-pyqt5 tk`
 - Install `yay` from AUR if missing:
   - `sudo pacman -S --needed base-devel git`
-  - `git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si`
+  - `git clone https://aur.archlinux.org/yay.git && (cd yay && makepkg -si)`
+  - On Manjaro, `yay` is in the repos: `sudo pacman -S --needed yay`
+
+- Install via git and run the Qt GUI:
+  - `git clone https://github.com/ahmoodio/yay-gui-manager.git`
+  - `cd yay-gui-manager`
+  - `pip3 install --user -r python/requirements`
+  - `chmod +x python/yay_gui.py`
+  - `./python/yay_gui.py`
 
 ## Run the apps (Arch‑based)
 
 - Yay GUI (Qt):
-  - `python3 python/yay_gui.py`
+  - `chmod +x python/yay_gui.py && ./python/yay_gui.py`
   - Requires `pacman` and `yay` available in PATH.
 
 - Cachy Updater GUI (Tk):
