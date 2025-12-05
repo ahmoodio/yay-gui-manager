@@ -1,0 +1,9 @@
+# Python packages required by the GUI tools in this folder
+# Install with: pip install -r requirements
+
+# For yay_gui.py (Qt-based GUI)
+PyQt5
+
+# Note: the Tk-based updater (cachy_updater_gui.py) uses the standard
+# library tkinter module. On some systems you may need to install
+# system packages (e.g. tk) instead of pip packages.
