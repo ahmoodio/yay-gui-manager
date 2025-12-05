@@ -1,0 +1,10 @@
+# Python packages required by the GUI tools in this folder
+# Install with: pip install -r requirements
+
+# For yay_gui.py (Qt-based GUI)
+PyQt5
+
+# Note: tkinter-based tools (btd_gui.py, cachy_updater_gui.py,
+# givemebadge_gui.py, gpu-recorder-control.py) use the standard
+# library tkinter module. On some systems you may need to install
+# system packages (e.g. python3-tk / tk) instead of pip packages.
