@@ -14,7 +14,7 @@ Built with <strong>Python + PyQt5</strong>, with real-time streaming parsing for
 
 ### 🔍 Search & Install  
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
-![Search Demo](https://cdn.discordapp.com/attachments/1316059512947474524/1446727609940447433/68747470733a2f2f73362e657a6769662e636f6d2f746d702f657a6769662d363564633733613031336133386339342e676966.gif?ex=69350995&is=6933b815&hm=5877fc53645bf77fd5dd4817635b616a236547336173bcc0bb7afbe89815a845&)
+![Search Demo](https://drive.google.com/file/d/1tlQd_9ET4QeF6WWx4wwdy7X18eYhYQnS/view?usp=drive_link)
 
 
 
@@ -23,13 +23,13 @@ Built with <strong>Python + PyQt5</strong>, with real-time streaming parsing for
 
 ### 📦 Installed Packages  
 <em>Explicitly installed packages (pacman -Qe) with filter + batch uninstall.</em>  
-![Installed Tab](https://media.discordapp.net/attachments/1316059512947474524/1446727610401816697/68747470733a2f2f73362e657a6769662e636f6d2f746d702f657a6769662d363733313432303831336639326536372e676966.gif?ex=69350995&is=6933b815&hm=480b18be8da1ef9a4af97014dd12e208da7901134201a1540c319615e6d7e4da&=)
+![Installed Tab](https://drive.google.com/file/d/1tbZExYl0nm3ISJ5hqKyDeF4QFDEdy-21/view?usp=sharing)
 
 ---
 
 ### 🔄 Updates Tab  
 <em>Repo + AUR updates (yay -Qu / -Qua) with batch update tools.</em>  
-![Updates Tab](https://media.discordapp.net/attachments/1316059512947474524/1446727610787954749/68747470733a2f2f73362e657a6769662e636f6d2f746d702f657a6769662d366436383832376438326661333934302e676966.gif?ex=69350995&is=6933b815&hm=b9527042542c7746eda690c9db150d98365d6580c8e76339b1fa001b0e47114f&=)
+![Updates Tab](https://drive.google.com/file/d/1BnCk667_18hg2CYpXXloBCxQymO7pnHA/view?usp=sharing)
 
 
 ---
