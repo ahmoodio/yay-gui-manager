@@ -11,13 +11,13 @@ A modern, fast, and user-friendly graphical interface for **yay** on Arch-based 
 ## 🎥 Demo GIFs
 
 ### 🔍 Search & Install
-![Search](https://s6.ezgif.com/tmp/ezgif-65dc73a013a38c94.gif)
+![Search]([https://s6.ezgif.com/tmp/ezgif-65dc73a013a38c94.gif](https://media.discordapp.net/attachments/1316059512947474524/1446727609940447433/68747470733a2f2f73362e657a6769662e636f6d2f746d702f657a6769662d363564633733613031336133386339342e676966.gif?ex=69350995&is=6933b815&hm=5877fc53645bf77fd5dd4817635b616a236547336173bcc0bb7afbe89815a845&=))
 
 ### 📦 Installed Packages
-![Installed](https://s6.ezgif.com/tmp/ezgif-6731420813f92e67.gif)
+![Installed]([https://s6.ezgif.com/tmp/ezgif-6731420813f92e67.gif)]((https://media.discordapp.net/attachments/1316059512947474524/1446727610401816697/68747470733a2f2f73362e657a6769662e636f6d2f746d702f657a6769662d363733313432303831336639326536372e676966.gif?ex=69350995&is=6933b815&hm=480b18be8da1ef9a4af97014dd12e208da7901134201a1540c319615e6d7e4da&=))
 
 ### 🔄 Updates
-![Updates](https://s6.ezgif.com/tmp/ezgif-6d68827d82fa3940.gif)
+![Updates]([https://s6.ezgif.com/tmp/ezgif-6d68827d82fa3940.gif](https://media.discordapp.net/attachments/1316059512947474524/1446727610787954749/68747470733a2f2f73362e657a6769662e636f6d2f746d702f657a6769662d366436383832376438326661333934302e676966.gif?ex=69350995&is=6933b815&hm=b9527042542c7746eda690c9db150d98365d6580c8e76339b1fa001b0e47114f&=)
 
 ## 🛠️ Development
 
