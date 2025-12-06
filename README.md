@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="desktop/yay-gui.png" alt="Yay GUI Manager logo" width="180"/>
+  <img src="[desktop/yay-gui.png](https://cdn.discordapp.com/attachments/1316059512947474524/1446743829444165703/ChatGPT_Image_Dec_5_2025_11_48_48_PM.png?ex=693518b0&is=6933c730&hm=96d0bca8546af8185f68215047f28f2e437ebb34ea57959a65e97de745bdecea&)" alt="Yay GUI Manager logo" width="180"/>
 </p>
 
 <h1 align="center">Yay GUI Manager – Rebuilt</h1>
