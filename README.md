@@ -13,8 +13,9 @@ Built with <strong>Python + PyQt5</strong>, with real-time streaming parsing for
 # 🎥 Demo GIFs
 
 ### 🔍 Search & Install  
-*Search both repo + AUR and view descriptions in a side panel.*  
-▶️ [Watch Search Demo (WEBM)](https://cdn.discordapp.com/attachments/1316059512947474524/1446751025208758426/Screencast_20251205_231254.webm?ex=69351f63&is=6933cde3&hm=59f74ec480d6429753c9868086da29be586dd769d6fda16c696a6b4d89dd8b8f&)
+<em>Search both repo + AUR and view descriptions in a side panel.</em>  
+![Search Demo](https://media.discordapp.net/attachments/1316059512947474524/1446727609940447433/68747470733a2f2f73362e657a6769662e636f6d2f746d702f657a6769662d363564633733613031336133386339342e676966.gif?ex=69350995&is=6933b815&hm=5877fc53645bf77fd5dd4817635b616a236547336173bcc0bb7afbe89815a845&=)
+
 
 ---
 
