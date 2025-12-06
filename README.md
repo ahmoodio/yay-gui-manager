@@ -16,9 +16,6 @@ Built with <strong>Python + PyQt5</strong>, with real-time streaming parsing for
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
 ![Search Demo](https://drive.google.com/uc?export=view&id=1tlQd_9ET4QeF6WWx4wwdy7X18eYhYQnS)
 
-
-
-
 ---
 
 ### 📦 Installed Packages  
