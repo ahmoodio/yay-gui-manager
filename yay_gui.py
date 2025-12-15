@@ -7,15 +7,6 @@ import subprocess
 import shlex
 import sys
 
-
-from PySide6.QtWidgets import QApplication
-
-app = QApplication(sys.argv)
-
-app.setApplicationName("yay-gui")
-app.setDesktopFileName("yay-gui.desktop")
-app.setApplicationDisplayName("Yay GUI Manager")
-
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QPushButton, QTreeWidget, QTreeWidgetItem,
