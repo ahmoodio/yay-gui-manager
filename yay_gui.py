@@ -11,10 +11,11 @@ from PyQt5.QtWidgets import (
     QLineEdit, QPushButton, QTreeWidget, QTreeWidgetItem,
     QMessageBox, QStatusBar, QHeaderView, QTextEdit,
     QTabWidget, QFrame, QLabel,
-    QComboBox, QCheckBox, QFileDialog, QToolButton, QDialog
+    QComboBox, QCheckBox, QFileDialog, QToolButton, QDialog, QSlider, QSpinBox,
+    QShortcut
 )
-from PyQt5.QtCore import Qt, QProcess, QSettings, QSize
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt, QProcess, QSettings, QSize, QTimer
+from PyQt5.QtGui import QIcon, QKeySequence
 
 
 # ---- Crash logging ----
@@ -39,21 +40,18 @@ def _install_exception_hook():
 
 
 # ---- Helpers ----
-def clean_control_codes(text: str) -> str:
-    """Strip ANSI escape sequences including OSC8 hyperlinks.
+# Compile once for speed: stripping ANSI control codes is used on every line
+_ANSI_RE = re.compile(
+    r"\x1B("               # ESC
+    r"\[[0-?]*[ -/]*[@-~]"  # CSI sequence
+    r"|\][^\x07\x1B]*(?:\x07|\x1B\\)"  # OSC sequence terminated by BEL or ST
+    r"|[@-Z\\-_]"           # 2-char sequences
+    r")"
+)
 
-    - CSI: ESC [ ... cmd
-    - OSC: ESC ] ... BEL or ESC \\
-    - Single-char escapes: ESC followed by @-Z, \\ or _
-    """
-    ansi_re = re.compile(
-        r"\x1B("               # ESC
-        r"\[[0-?]*[ -/]*[@-~]"  # CSI sequence
-        r"|\][^\x07\x1B]*(?:\x07|\x1B\\)"  # OSC sequence terminated by BEL or ST
-        r"|[@-Z\\-_]"           # 2-char sequences
-        r")"
-    )
-    return ansi_re.sub('', text)
+def clean_control_codes(text: str) -> str:
+    """Strip ANSI escape sequences including OSC8 hyperlinks."""
+    return _ANSI_RE.sub('', text)
 
 
 def parse_yay_search(output: str):
@@ -258,6 +256,11 @@ class YayGUI(QWidget):
             'aur': {'current': None, 'item': None}
         }
         self._search_done = {'repo': True, 'aur': True}
+        # Search pagination/state
+        self._search_default_max_items = getattr(self, '_search_max_items', 500)
+        self._search_page = 1
+        self._search_truncated = False
+        self._preserve_checked_names = None
         # Details fetch state
         self._info_procs = {}
         self._info_buffers = {}
@@ -300,6 +303,19 @@ class YayGUI(QWidget):
         self.tabs.addTab(self.search_tab, 'Search & Install')
         self.installed_tab_index = self.tabs.addTab(self.installed_tab, 'Installed Packages')
         self.update_tab_index = self.tabs.addTab(self.update_tab, 'Update')
+        # Set tab icons if available (modern look)
+        try:
+            si = QIcon.fromTheme('system-search')
+            if si and not si.isNull():
+                self.tabs.setTabIcon(0, si)
+            ipkg = QIcon.fromTheme('package-x-generic')
+            if ipkg and not ipkg.isNull():
+                self.tabs.setTabIcon(self.installed_tab_index, ipkg)
+            upd = QIcon.fromTheme('software-update-available')
+            if upd and not upd.isNull():
+                self.tabs.setTabIcon(self.update_tab_index, upd)
+        except Exception:
+            pass
 
         # Auto-load installed packages when the Installed tab is first opened
         self.tabs.currentChanged.connect(self._on_tab_changed)
@@ -310,8 +326,22 @@ class YayGUI(QWidget):
         # ---- Updates deduplication set ----
         self._updates_seen = set()  # (source, name)
 
+        # Apply modern icons and accents to buttons
+        try:
+            self._setup_modern_buttons()
+        except Exception:
+            pass
         # Load saved settings and apply theme
         self._load_settings()
+
+        # Global shortcuts for productivity
+        try:
+            self._sc_focus = QShortcut(QKeySequence('Ctrl+F'), self)
+            self._sc_focus.activated.connect(self._focus_current_filter)
+            self._sc_refresh = QShortcut(QKeySequence('Ctrl+R'), self)
+            self._sc_refresh.activated.connect(self._refresh_current_tab)
+        except Exception:
+            pass
 
         # Preload installed names so search can hide installed packages
         try:
@@ -386,10 +416,20 @@ class YayGUI(QWidget):
             self.status_bar.showMessage(f'Repo search error: {e}')
         except Exception:
             pass
+        # Treat as finished so UI can finalize
+        try:
+            self._search_one_finished('repo')
+        except Exception:
+            pass
 
     def _on_aur_search_error(self, e):
         try:
             self.status_bar.showMessage(f'AUR search error: {e}')
+        except Exception:
+            pass
+        # Treat as finished so UI can finalize
+        try:
+            self._search_one_finished('aur')
         except Exception:
             pass
 
@@ -422,6 +462,16 @@ class YayGUI(QWidget):
         dlg.setWindowTitle('Settings')
         lay = QVBoxLayout(dlg)
         lay.addWidget(self._build_settings_tab())
+        # Bottom buttons row: Apply and Close
+        btn_row = QHBoxLayout()
+        btn_row.addStretch(1)
+        apply_btn = QPushButton('Apply')
+        close_btn = QPushButton('Close')
+        apply_btn.clicked.connect(lambda: (self._apply_settings_from_ui(), dlg.accept()))
+        close_btn.clicked.connect(dlg.accept)
+        btn_row.addWidget(apply_btn)
+        btn_row.addWidget(close_btn)
+        lay.addLayout(btn_row)
         dlg.resize(700, 420)
         dlg.exec_()
 
@@ -452,15 +502,49 @@ class YayGUI(QWidget):
         left.addWidget(self.status_bar)
 
         top = QHBoxLayout()
+        try:
+            top.setContentsMargins(0, 0, 0, 0)
+            top.setSpacing(8)
+        except Exception:
+            pass
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText('Search (name only)')
         self.search_input.setMinimumWidth(500)
         self.search_input.returnPressed.connect(self.do_search)
+        try:
+            self.search_input.setClearButtonEnabled(True)
+        except Exception:
+            pass
+
+        # Source dropdown to restrict searches (improves speed when AUR is slow)
+        self.search_source_filter = QComboBox()
+        self.search_source_filter.addItems(['All', 'Pacman', 'Yay'])
+        self.search_source_filter.setMinimumWidth(110)
+        # When changed, apply to currently shown results (no need to refetch)
+        self.search_source_filter.currentTextChanged.connect(self._apply_search_filter)
+
         btn = QPushButton('Search')
         btn.setFixedWidth(90)
         btn.clicked.connect(self.do_search)
+        self.search_btn = btn
+        try:
+            self.search_btn.setObjectName('btn-search')
+        except Exception:
+            pass
+        # Install button moved to the top row for quick access
+        self.install_button = QPushButton('Install Selected')
+        self.install_button.clicked.connect(self.do_install)
+        try:
+            self.install_button.setObjectName('btn-install')
+        except Exception:
+            pass
+        # Order: input, Search, Install, then Source aligned to far right
         top.addWidget(self.search_input, 1)
         top.addWidget(btn)
+        top.addWidget(self.install_button)
+        top.addStretch(1)
+        top.addWidget(QLabel('Source:'))
+        top.addWidget(self.search_source_filter)
         left.addLayout(top)
 
         self.search_results = QTreeWidget()
@@ -468,6 +552,10 @@ class YayGUI(QWidget):
         self.search_results.setColumnCount(4)
         self.search_results.setSortingEnabled(False)
         self.search_results.setUniformRowHeights(True)
+        try:
+            self.search_results.setAlternatingRowColors(False)
+        except Exception:
+            pass
         header = self.search_results.header()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
@@ -475,13 +563,21 @@ class YayGUI(QWidget):
         header.setSectionResizeMode(3, QHeaderView.Stretch)
         left.addWidget(self.search_results)
 
-        self.install_button = QPushButton('Install Selected (yay -S)')
-        self.install_button.clicked.connect(self.do_install)
-        left.addWidget(self.install_button)
+        # See more button (appears when results are truncated)
+        self.see_more_button = QPushButton('See more…')
+        self.see_more_button.setVisible(False)
+        self.see_more_button.clicked.connect(self._see_more_clicked)
+        left.addWidget(self.see_more_button)
+
+        # Install button moved to the top; no button here at bottom
 
         layout.addLayout(left, 2)
 
         self.sidebar_text = QTextEdit(readOnly=True)
+        try:
+            self.sidebar_text.setObjectName('sidebarText')
+        except Exception:
+            pass
         self.sidebar_text.setHtml('<h3>Details</h3><p>Click a package to view details.</p>')
         layout.addWidget(self.sidebar_text, 1)
 
@@ -540,40 +636,75 @@ class YayGUI(QWidget):
     def _build_installed_tab(self):
         tab = QWidget()
         v = QVBoxLayout(tab)
-        top = QHBoxLayout()
-        self.installed_status = QStatusBar()
-        self.installed_status.showMessage("Installed packages (pacman -Qen/-Qem)")
-        refresh = QPushButton('Refresh (yay -Qe)')
-        refresh.clicked.connect(self.do_list_installed)
-        # Move Uninstall button to top bar next to Refresh
-        remove = QPushButton('Uninstall Selected (yay -Rns)')
-        remove.clicked.connect(self.do_uninstall)
-        self.uninstall_button = remove
 
-        top.addWidget(self.installed_status, 1)
-        top.addWidget(refresh)
-        top.addWidget(remove)
-        v.addLayout(top)
-
-        # Filter bar with text + source dropdown
-        from PyQt5.QtWidgets import QLineEdit
-        filter_bar = QHBoxLayout()
+        # Controls row (filter + select all + actions, Source aligned far right)
+        controls = QHBoxLayout()
+        try:
+            controls.setContentsMargins(0, 0, 0, 0)
+            controls.setSpacing(8)
+        except Exception:
+            pass
+        try:
+            controls.setContentsMargins(0, 0, 0, 0)
+            controls.setSpacing(8)
+        except Exception:
+            pass
         self.installed_filter = QLineEdit()
         self.installed_filter.setPlaceholderText('Filter installed (name/version)')
         self.installed_filter.textChanged.connect(self._filter_installed_list)
-        filter_bar.addWidget(self.installed_filter)
-        filter_bar.addWidget(QLabel('Source:'))
+        try:
+            self.installed_filter.setClearButtonEnabled(True)
+        except Exception:
+            pass
+        controls.addWidget(self.installed_filter, 2)
+
+        self.installed_select_all_cb = QCheckBox('Select All')
+        self.installed_select_all_cb.toggled.connect(self._toggle_select_all_installed)
+        controls.addWidget(self.installed_select_all_cb)
+
+        # Action buttons
+        self.uninstall_button = QPushButton('Uninstall Selected')
+        self.uninstall_button.clicked.connect(self.do_uninstall)
+        controls.addWidget(self.uninstall_button)
+
+        try:
+            self.uninstall_button.setObjectName('btn-uninstall')
+        except Exception:
+            pass
+
+        refresh = QPushButton('Refresh')
+        refresh.clicked.connect(self.do_list_installed)
+        self.installed_refresh_btn = refresh
+        try:
+            self.installed_refresh_btn.setObjectName('btn-refresh-installed')
+        except Exception:
+            pass
+        controls.addWidget(refresh)
+
+        # Push Source dropdown to far right
+        controls.addStretch(1)
+        controls.addWidget(QLabel('Source:'))
         self.installed_source_filter = QComboBox()
         self.installed_source_filter.addItems(['All', 'Pacman', 'Yay'])
         self.installed_source_filter.currentTextChanged.connect(self._filter_installed_list)
         self.installed_source_filter.setMinimumWidth(110)
-        filter_bar.addWidget(self.installed_source_filter)
-        v.addLayout(filter_bar)
+        controls.addWidget(self.installed_source_filter)
+
+        v.addLayout(controls)
+
+        # Status bar below controls
+        self.installed_status = QStatusBar()
+        self.installed_status.showMessage("Installed packages (pacman -Qen/-Qem)")
+        v.addWidget(self.installed_status)
 
         self.installed_view = QTreeWidget()
         self.installed_view.setHeaderLabels(['Select', 'Package', 'Version', 'Source'])
         self.installed_view.setColumnCount(4)
         self.installed_view.setUniformRowHeights(True)
+        try:
+            self.installed_view.setAlternatingRowColors(False)
+        except Exception:
+            pass
         header = self.installed_view.header()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
@@ -599,30 +730,47 @@ class YayGUI(QWidget):
         tab = QWidget()
         v = QVBoxLayout(tab)
 
-        # Controls row (filter + select all + action buttons + refresh + source dropdown)
+        # Controls row (filter + select all + actions, Source aligned far right)
         controls = QHBoxLayout()
         from PyQt5.QtWidgets import QLineEdit
+        # Filter field first (stretch)
         self.update_filter = QLineEdit()
         self.update_filter.setPlaceholderText('Filter updates...')
         self.update_filter.textChanged.connect(self._filter_updates_list)
+        try:
+            self.update_filter.setClearButtonEnabled(True)
+        except Exception:
+            pass
         controls.addWidget(self.update_filter, 2)
 
+        # Select All checkbox next to filter
         self.select_all_cb = QCheckBox('Select All')
         self.select_all_cb.toggled.connect(self._toggle_select_all)
         controls.addWidget(self.select_all_cb)
 
-        update_btn = QPushButton('Update Selected (yay -S)')
+        # Action buttons to the right
+        update_btn = QPushButton('Update Selected')
         update_btn.clicked.connect(self.do_update_selected)
+        self.update_btn = update_btn
+        try:
+            self.update_btn.setObjectName('btn-update')
+        except Exception:
+            pass
         controls.addWidget(update_btn)
 
-        update_all_btn = QPushButton('Update All (yay -Syu)')
-        update_all_btn.clicked.connect(self.do_update_all)
-        controls.addWidget(update_all_btn)
+        # Removed global Update All button
 
-        refresh = QPushButton('Refresh Updates')
+        refresh = QPushButton('Refresh')
         refresh.clicked.connect(self.do_list_updates)
+        self.updates_refresh_btn = refresh
+        try:
+            self.updates_refresh_btn.setObjectName('btn-refresh-updates')
+        except Exception:
+            pass
         controls.addWidget(refresh)
 
+        # Push Source dropdown to far right
+        controls.addStretch(1)
         controls.addWidget(QLabel('Source:'))
         self.updates_source_filter = QComboBox()
         self.updates_source_filter.addItems(['All', 'Pacman', 'Yay'])
@@ -642,6 +790,10 @@ class YayGUI(QWidget):
         self.updates_view.setHeaderLabels(['Select', 'Package', 'Current', 'New', 'Source'])
         self.updates_view.setColumnCount(5)
         self.updates_view.setUniformRowHeights(True)
+        try:
+            self.updates_view.setAlternatingRowColors(False)
+        except Exception:
+            pass
         header = self.updates_view.header()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
@@ -677,6 +829,70 @@ class YayGUI(QWidget):
 
         v.addSpacing(8)
 
+        # Appearance & behavior (no toggles)
+        ab_label = QLabel('<b>Appearance & Behavior</b>')
+        v.addWidget(ab_label)
+
+        # Accent color row
+        ac_row = QHBoxLayout()
+        ac_row.addWidget(QLabel('Accent color (#RRGGBB):'))
+        self.accent_edit = QLineEdit()
+        self.accent_edit.setPlaceholderText('#1a73e8')
+        self.accent_edit.setMaximumWidth(120)
+        self.accent_edit.textEdited.connect(self._on_accent_edited)
+        ac_row.addWidget(self.accent_edit)
+        v.addLayout(ac_row)
+
+        v.addSpacing(8)
+
+        # Search settings
+        search_label = QLabel('<b>Search</b>')
+        v.addWidget(search_label)
+
+        cap_row = QHBoxLayout()
+        cap_row.addWidget(QLabel('Results cap:'))
+        self.search_cap_slider = QSlider(Qt.Horizontal)
+        self.search_cap_slider.setRange(100, 5000)
+        self.search_cap_slider.setSingleStep(50)
+        self.search_cap_slider.setPageStep(500)
+        self.search_cap_slider.setTickInterval(500)
+        self.search_cap_slider.setTickPosition(QSlider.TicksBelow)
+        # Initialize from current/default cap
+        try:
+            self.search_cap_slider.setValue(int(getattr(self, '_search_default_max_items', 500)))
+        except Exception:
+            self.search_cap_slider.setValue(500)
+        self.search_cap_slider.valueChanged.connect(self._on_search_cap_changed)
+        cap_row.addWidget(self.search_cap_slider, 1)
+        # Numeric entry (typeable)
+        self.search_cap_spin = QSpinBox()
+        self.search_cap_spin.setRange(100, 5000)
+        self.search_cap_spin.setSingleStep(50)
+        try:
+            self.search_cap_spin.setValue(int(getattr(self, '_search_default_max_items', 500)))
+        except Exception:
+            self.search_cap_spin.setValue(500)
+        self.search_cap_spin.valueChanged.connect(self._on_search_cap_changed)
+        self.search_cap_spin.setMaximumWidth(100)
+        # Validate and clean invalid keystrokes, show ephemeral error
+        try:
+            le = self.search_cap_spin.lineEdit()
+            le.textEdited.connect(self._on_search_cap_text_edited)
+            self.search_cap_spin.editingFinished.connect(self._on_search_cap_editing_finished)
+        except Exception:
+            pass
+        cap_row.addWidget(self.search_cap_spin)
+        v.addLayout(cap_row)
+
+        # Ephemeral error label for invalid input
+        self.search_cap_error = QLabel('')
+        self.search_cap_error.setStyleSheet('color: #c62828;')
+        self.search_cap_error.setVisible(False)
+        v.addWidget(self.search_cap_error)
+        self._cap_error_timer = QTimer(self)
+        self._cap_error_timer.setSingleShot(True)
+        self._cap_error_timer.timeout.connect(lambda: self.search_cap_error.setVisible(False))
+
         # Theme settings
         theme_label = QLabel('<b>Theme</b>')
         v.addWidget(theme_label)
@@ -704,7 +920,20 @@ class YayGUI(QWidget):
         keep_open = st.value('keep_open', True, type=bool)
         theme = st.value('theme', 'System', type=str)
         self._custom_css = st.value('custom_css', '', type=str) or ''
+        search_cap = st.value('search_cap', 500, type=int)
+        # New settings
+        # No appearance toggles
+        self._accent_color = st.value('accent_color', '#1a73e8', type=str) or '#1a73e8'
+        # Persisted sources per tab
+        self._src_search = st.value('src_search', 'All', type=str)
+        self._src_installed = st.value('src_installed', 'All', type=str)
+        self._src_updates = st.value('src_updates', 'All', type=str)
         self.keep_konsole_open = bool(keep_open)
+        # Apply search cap
+        try:
+            self._search_default_max_items = int(search_cap) if int(search_cap) > 0 else 500
+        except Exception:
+            self._search_default_max_items = 500
         # Sync UI if available
         # no integrated log toggle in UI anymore
         if hasattr(self, 'keep_open_cb'):
@@ -713,10 +942,43 @@ class YayGUI(QWidget):
             idx = self.theme_combo.findText(theme)
             if idx >= 0:
                 self.theme_combo.setCurrentIndex(idx)
+        # Appearance & behavior UI
+        # No appearance toggles to sync
+        if hasattr(self, 'accent_edit'):
+            self.accent_edit.setText(self._accent_color)
+        # Update controls if present
+        try:
+            if hasattr(self, 'search_cap_slider') or hasattr(self, 'search_cap_spin'):
+                self._on_search_cap_changed(int(self._search_default_max_items))
+        except Exception:
+            pass
+        # Apply source selections
+        try:
+            if hasattr(self, 'search_source_filter') and self._src_search:
+                i = self.search_source_filter.findText(self._src_search)
+                if i >= 0:
+                    self.search_source_filter.setCurrentIndex(i)
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'installed_source_filter') and self._src_installed:
+                i = self.installed_source_filter.findText(self._src_installed)
+                if i >= 0:
+                    self.installed_source_filter.setCurrentIndex(i)
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'updates_source_filter') and self._src_updates:
+                i = self.updates_source_filter.findText(self._src_updates)
+                if i >= 0:
+                    self.updates_source_filter.setCurrentIndex(i)
+        except Exception:
+            pass
         # Apply theme
         if (theme or '').lower() == 'custom' and not self._custom_css:
             theme = 'System'
         self._apply_theme(theme)
+        # Icon-only removed, nothing to apply
 
     def _save_settings(self):
         st = QSettings('YayGUI', 'YayGUI')
@@ -727,6 +989,27 @@ class YayGUI(QWidget):
             st.setValue('custom_css', getattr(self, '_custom_css', ''))
         else:
             st.setValue('custom_css', '')
+        # Persist search cap
+        try:
+            st.setValue('search_cap', int(getattr(self, '_search_default_max_items', 500)))
+        except Exception:
+            st.setValue('search_cap', 500)
+        # Persist new settings (none for appearance)
+        # Icon-only removed
+        st.setValue('accent_color', str(getattr(self, '_accent_color', '#1a73e8')))
+        # Persist source selections
+        try:
+            st.setValue('src_search', self.search_source_filter.currentText())
+        except Exception:
+            pass
+        try:
+            st.setValue('src_installed', self.installed_source_filter.currentText())
+        except Exception:
+            pass
+        try:
+            st.setValue('src_updates', self.updates_source_filter.currentText())
+        except Exception:
+            pass
 
     def _restore_default_theme(self):
         # Clear custom style and switch to System theme
@@ -764,8 +1047,213 @@ class YayGUI(QWidget):
             css = self._solarized_light_theme_stylesheet()
         elif n == 'custom':
             css = getattr(self, '_custom_css', '')
-        # System -> empty stylesheet
+        # Always append modern button styling
+        try:
+            css = (css or '') + self._modern_button_styles()
+        except Exception:
+            pass
+        # System -> empty stylesheet plus our modern button rules
         app.setStyleSheet(css)
+
+    def _apply_settings_from_ui(self):
+        # Pull values from UI controls and persist them
+        try:
+            if hasattr(self, 'keep_open_cb'):
+                self.keep_konsole_open = bool(self.keep_open_cb.isChecked())
+        except Exception:
+            pass
+        # No appearance toggles
+        # Icon-only removed
+        # Accent color
+        try:
+            if hasattr(self, 'accent_edit'):
+                self._on_accent_edited(self.accent_edit.text())
+        except Exception:
+            pass
+        # Search cap
+        try:
+            if hasattr(self, 'search_cap_spin'):
+                self._on_search_cap_changed(int(self.search_cap_spin.value()))
+            elif hasattr(self, 'search_cap_slider'):
+                self._on_search_cap_changed(int(self.search_cap_slider.value()))
+        except Exception:
+            pass
+        # Re-apply theme to pick up compact/accent changes
+        try:
+            current_theme = self.theme_combo.currentText() if hasattr(self, 'theme_combo') else 'System'
+            self._apply_theme(current_theme)
+        except Exception:
+            pass
+        # Persist everything
+        self._save_settings()
+
+    # ---- Visual helpers ----
+
+    # ---- Behavior toggles ----
+    # Removed: modern colors toggle
+
+    # Icon-only mode removed
+
+    def _on_accent_edited(self, text: str):
+        s = (text or '').strip()
+        import re as _re
+        if _re.match(r'^#[0-9a-fA-F]{6}$', s):
+            self._accent_color = s
+            self._apply_theme(getattr(self.theme_combo, 'currentText', lambda: 'System')())
+            self._save_settings()
+        else:
+            # ignore invalid until fixed
+            pass
+
+    # ---- Shortcuts ----
+    def _focus_current_filter(self):
+        try:
+            idx = self.tabs.currentIndex()
+            if idx == 0 and hasattr(self, 'search_input'):
+                self.search_input.setFocus()
+            elif idx == getattr(self, 'installed_tab_index', 1) and hasattr(self, 'installed_filter'):
+                self.installed_filter.setFocus()
+            elif idx == getattr(self, 'update_tab_index', 2) and hasattr(self, 'update_filter'):
+                self.update_filter.setFocus()
+        except Exception:
+            pass
+
+    def _refresh_current_tab(self):
+        try:
+            idx = self.tabs.currentIndex()
+            if idx == 0:
+                self.do_search()
+            elif idx == getattr(self, 'installed_tab_index', 1):
+                self.do_list_installed()
+            elif idx == getattr(self, 'update_tab_index', 2):
+                self.do_list_updates()
+        except Exception:
+            pass
+
+    def _set_btn_icon(self, btn: QPushButton, icon_names):
+        try:
+            from PyQt5.QtGui import QIcon
+            for name in icon_names:
+                ic = QIcon.fromTheme(name)
+                if ic and not ic.isNull():
+                    btn.setIcon(ic)
+                    btn.setIconSize(QSize(18, 18))
+                    return
+        except Exception:
+            pass
+
+    def _setup_modern_buttons(self):
+        # Assign icons and accent property for primary actions
+        try:
+            if hasattr(self, 'search_btn'):
+                self._set_btn_icon(self.search_btn, ['system-search', 'edit-find', 'search'])
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'install_button'):
+                self.install_button.setProperty('accent', True)
+                self._set_btn_icon(self.install_button, ['list-add', 'system-software-install', 'list-add-symbolic'])
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'update_btn'):
+                self.update_btn.setProperty('accent', True)
+                self._set_btn_icon(self.update_btn, ['system-software-update', 'software-update-available', 'view-refresh'])
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'updates_refresh_btn'):
+                self._set_btn_icon(self.updates_refresh_btn, ['view-refresh', 'reload'])
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'uninstall_button'):
+                self.uninstall_button.setProperty('accent', True)
+                self._set_btn_icon(self.uninstall_button, ['edit-delete', 'user-trash', 'user-trash-symbolic'])
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'installed_refresh_btn'):
+                self._set_btn_icon(self.installed_refresh_btn, ['view-refresh', 'reload'])
+        except Exception:
+            pass
+    def _accent_rgb(self):
+        s = str(getattr(self, '_accent_color', '#1a73e8') or '#1a73e8').lstrip('#')
+        try:
+            r = int(s[0:2], 16); g = int(s[2:4], 16); b = int(s[4:6], 16)
+            return r, g, b
+        except Exception:
+            return 26, 115, 232
+
+    def _modern_button_styles(self) -> str:
+        # Shared modern styling for inputs and buttons (light/dark friendly)
+        r, g, b = self._accent_rgb()
+        sel_rgba = f"rgba({r},{g},{b},0.18)"
+        accent = str(getattr(self, '_accent_color', '#1a73e8') or '#1a73e8')
+        # Default paddings
+        padding = '6px 12px'
+        ipadding = '6px 8px'
+        header_pad = '6px 8px'
+        tab_pad = '6px 10px'
+        item_pad = '4px 8px'
+        # Accent button CSS (always on; modern is default)
+        btn_css = (
+            f"QPushButton[accent=\\\"true\\\"] {{ background: {accent}; color: #ffffff; border: 1px solid {accent}; }}\n"
+            "QPushButton[accent=\"true\"]:hover { filter: brightness(1.05); }\n"
+            "QPushButton[accent=\"true\"]:pressed { filter: brightness(0.95); }\n"
+        )
+        # Unified sizes across tabs
+        font_px = 13
+        ctrl_h = 32
+        row_h = 26
+        tab_font_px = font_px
+        header_font_px = font_px
+        return f"""
+        /* Base */
+        QWidget {{ font-size: {font_px}px; }}
+        QLabel {{ font-size: {font_px}px; }}
+        QStatusBar {{ font-size: {font_px}px; }}
+
+        /* Inputs */
+        QLineEdit, QPlainTextEdit, QTextEdit, QComboBox {{
+            border-radius: 6px; padding: {ipadding}; border: 1px solid rgba(0,0,0,0.22); font-size: {font_px}px; min-height: {ctrl_h}px;
+        }}
+        QLineEdit:focus, QPlainTextEdit:focus, QTextEdit:focus, QComboBox:focus {
+            border: 1px solid {accent}; outline: none; box-shadow: 0 0 0 2px {sel_rgba};
+        }
+        QComboBox QAbstractItemView { border-radius: 6px; }
+        
+        /* Buttons */
+        QPushButton {{ border-radius: 6px; padding: {padding}; border: 1px solid rgba(0,0,0,0.18); font-size: {font_px}px; min-height: {ctrl_h}px; }}
+        QPushButton:hover { background-color: rgba(0,0,0,0.05); }
+        QPushButton:pressed { background-color: rgba(0,0,0,0.10); }
+        {btn_css}
+        QToolButton { border-radius: 6px; }
+        
+        /* Checkboxes */
+        QCheckBox { padding: 2px 4px; font-size: {font_px}px; }
+        QCheckBox::indicator {{ width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.35); background: rgba(0,0,0,0.02); }}
+        QCheckBox::indicator:checked {{ background: {accent}; border: 1px solid {accent}; }}
+        QCheckBox::indicator:checked:hover {{ background: {accent}; }}
+        
+        /* Lists and headers */
+        QTreeWidget {{ border: 1px solid rgba(0,0,0,0.18); border-radius: 6px; font-size: {font_px}px; }}
+        QHeaderView::section {{ background: rgba(0,0,0,0.04); padding: {header_pad}; border: 0px; font-size: {header_font_px}px; }}
+        QTreeWidget::item:selected {{ background: {sel_rgba}; color: inherit; }}
+        QTreeWidget::item:hover {{ background: rgba(0,0,0,0.06); }}
+        QTreeView::item {{ padding: {item_pad}; height: {row_h}px; }}
+        
+        /* Tabs */
+        QTabBar::tab { padding: {tab_pad}; margin: 2px; border-radius: 6px; font-size: {tab_font_px}px; }
+        QTabBar::tab:selected { background: {sel_rgba}; }
+        QTabBar::tab:hover { background: rgba(0,0,0,0.06); }
+
+        /* Sidebar card */
+        QTextEdit#sidebarText {{ border: 1px solid rgba(0,0,0,0.18); border-radius: 8px; background: rgba(0,0,0,0.02); padding: 8px; }}
+        
+        /* Status bar */
+        QStatusBar { border: 1px solid rgba(0,0,0,0.12); border-radius: 6px; padding: 2px 6px; font-size: {font_px}px; }
+        """
 
     def _light_theme_stylesheet(self) -> str:
         # Subtle light theme close to system defaults
@@ -792,6 +1280,86 @@ class YayGUI(QWidget):
         QTabWidget::pane { border: 1px solid #2a2a2a; }
         QSplitter::handle { background: #2a2a2a; }
         """
+
+    def _on_search_cap_changed(self, value: int):
+        try:
+            self._search_default_max_items = int(value)
+        except Exception:
+            self._search_default_max_items = 500
+        # Keep slider and spin in sync
+        try:
+            if hasattr(self, 'search_cap_spin') and self.search_cap_spin.value() != int(self._search_default_max_items):
+                self.search_cap_spin.blockSignals(True)
+                self.search_cap_spin.setValue(int(self._search_default_max_items))
+                self.search_cap_spin.blockSignals(False)
+        except Exception:
+            pass
+        try:
+            if hasattr(self, 'search_cap_slider') and self.search_cap_slider.value() != int(self._search_default_max_items):
+                self.search_cap_slider.blockSignals(True)
+                self.search_cap_slider.setValue(int(self._search_default_max_items))
+                self.search_cap_slider.blockSignals(False)
+        except Exception:
+            pass
+        # Save immediately so it persists
+        self._save_settings()
+
+    def _on_search_cap_text_edited(self, text: str):
+        # Strip any non-digit characters immediately and show a temporary error
+        digits = ''.join(ch for ch in (text or '') if ch.isdigit())
+        if digits != text:
+            try:
+                le = self.search_cap_spin.lineEdit()
+                le.blockSignals(True)
+                le.setText(digits)
+                le.blockSignals(False)
+            finally:
+                pass
+            self._show_cap_error('Invalid input')
+
+    def _on_search_cap_editing_finished(self):
+        try:
+            le = self.search_cap_spin.lineEdit()
+            text = le.text().strip()
+        except Exception:
+            text = ''
+        if not text:
+            # Empty is invalid; restore last valid value and show error
+            try:
+                self._show_cap_error('Invalid input')
+                self._on_search_cap_changed(int(getattr(self, '_search_default_max_items', 500)))
+            except Exception:
+                pass
+            return
+        try:
+            val = int(text)
+        except Exception:
+            self._show_cap_error('Invalid input')
+            # Restore last valid value
+            self._on_search_cap_changed(int(getattr(self, '_search_default_max_items', 500)))
+            return
+        minv = int(self.search_cap_spin.minimum()) if hasattr(self, 'search_cap_spin') else 100
+        maxv = int(self.search_cap_spin.maximum()) if hasattr(self, 'search_cap_spin') else 5000
+        if val < minv:
+            self._show_cap_error('Invalid input')
+            self._on_search_cap_changed(minv)
+        elif val > maxv:
+            self._show_cap_error('Invalid input')
+            self._on_search_cap_changed(maxv)
+        else:
+            # Valid; propagate as normal
+            self._on_search_cap_changed(val)
+
+    def _show_cap_error(self, msg: str):
+        try:
+            self.search_cap_error.setText(str(msg))
+            self.search_cap_error.setVisible(True)
+            # Restart timer for 1.5s
+            if self._cap_error_timer.isActive():
+                self._cap_error_timer.stop()
+            self._cap_error_timer.start(1500)
+        except Exception:
+            pass
 
     def _nord_theme_stylesheet(self) -> str:
         return """
@@ -894,6 +1462,13 @@ class YayGUI(QWidget):
             QMessageBox.warning(self, 'Missing', 'Please enter a search term.')
             return
         self._current_search_term = term.lower()
+        self._last_search_term = term
+        # Reset pagination
+        self._search_page = 1
+        try:
+            self.see_more_button.setVisible(False)
+        except Exception:
+            pass
         if not getattr(self, '_installed_names_ready', False):
             # Fetch installed names first so we can hide installed from results
             self._pending_search_term = term
@@ -902,7 +1477,7 @@ class YayGUI(QWidget):
             return
         self._start_search(term)
 
-    def _start_search(self, term):
+    def _start_search(self, term, preserve_checked=None):
         # Cancel any previous search processes
         for p in self._active_search_procs:
             try:
@@ -913,37 +1488,67 @@ class YayGUI(QWidget):
         self._active_search_procs = []
         self.search_results.clear()
         self.sidebar_text.setHtml('<h3>Details</h3><p>Searching...</p>')
-        self.status_bar.showMessage('Searching repos + AUR...')
+        sel = self.search_source_filter.currentText() if hasattr(self, 'search_source_filter') else 'All'
+        if sel == 'Pacman':
+            self.status_bar.showMessage('Searching repos...')
+        elif sel == 'Yay':
+            self.status_bar.showMessage('Searching AUR...')
+        else:
+            self.status_bar.showMessage('Searching repos + AUR...')
         self.search_buffer = ''
         self._search_pending = {'repo': '', 'aur': ''}
         self._search_ctx = {
             'repo': {'current': None, 'item': None},
             'aur': {'current': None, 'item': None}
         }
-        self._search_done = {'repo': False, 'aur': False}
+        # Mark sources we are not running as already done so completion logic works
+        run_repo = (sel in ('All', 'Pacman'))
+        run_aur = (sel in ('All', 'Yay'))
+        self._search_done = {'repo': not run_repo, 'aur': not run_aur}
         self.search_results.setSortingEnabled(False)
+        # Disable repaint while adding many rows to speed things up
+        try:
+            self.search_results.setUpdatesEnabled(False)
+        except Exception:
+            pass
+        # Reset truncation flag and apply effective cap for this page
+        self._search_truncated = False
+        try:
+            # Page 1 => default, page 2 => 2x, etc.
+            self._search_max_items = max(1, int(self._search_default_max_items) * max(1, int(getattr(self, '_search_page', 1))))
+        except Exception:
+            self._search_max_items = self._search_default_max_items
+        # Preserve previously checked names if provided
+        self._preserve_checked_names = set(preserve_checked or [])
+        # Hide See more until we know we're truncated
+        try:
+            self.see_more_button.setVisible(False)
+        except Exception:
+            pass
 
         # Repo search via pacman (fast)
-        repo = QProcess(self)
-        repo.setProgram('pacman')
-        repo.setArguments(['--color', 'never', '-Ss', term])
-        repo.setProcessChannelMode(QProcess.MergedChannels)
-        repo.readyReadStandardOutput.connect(lambda: self._collect_search_output_streaming('repo', repo))
-        repo.finished.connect(lambda _c=0, _s=0: self._search_one_finished('repo'))
-        repo.errorOccurred.connect(self._on_repo_search_error)
-        self._active_search_procs.append(repo)
-        repo.start()
+        if run_repo:
+            repo = QProcess(self)
+            repo.setProgram('pacman')
+            repo.setArguments(['--color', 'never', '-Ss', term])
+            repo.setProcessChannelMode(QProcess.MergedChannels)
+            repo.readyReadStandardOutput.connect(lambda: self._collect_search_output_streaming('repo', repo))
+            repo.finished.connect(lambda _c=0, _s=0: self._search_one_finished('repo'))
+            repo.errorOccurred.connect(self._on_repo_search_error)
+            self._active_search_procs.append(repo)
+            repo.start()
 
         # AUR search via yay (AUR only)
-        aur = QProcess(self)
-        aur.setProgram('yay')
-        aur.setArguments(['--color=never', '-Ss', term, '--aur'])
-        aur.setProcessChannelMode(QProcess.MergedChannels)
-        aur.readyReadStandardOutput.connect(lambda: self._collect_search_output_streaming('aur', aur))
-        aur.finished.connect(lambda _c=0, _s=0: self._search_one_finished('aur'))
-        aur.errorOccurred.connect(self._on_aur_search_error)
-        self._active_search_procs.append(aur)
-        aur.start()
+        if run_aur:
+            aur = QProcess(self)
+            aur.setProgram('yay')
+            aur.setArguments(['--color=never', '-Ss', term, '--aur'])
+            aur.setProcessChannelMode(QProcess.MergedChannels)
+            aur.readyReadStandardOutput.connect(lambda: self._collect_search_output_streaming('aur', aur))
+            aur.finished.connect(lambda _c=0, _s=0: self._search_one_finished('aur'))
+            aur.errorOccurred.connect(self._on_aur_search_error)
+            self._active_search_procs.append(aur)
+            aur.start()
 
     def _collect_search_output(self):
         # Kept for completeness; not used now
@@ -953,6 +1558,25 @@ class YayGUI(QWidget):
         chunk = bytes(proc.readAllStandardOutput()).decode('utf-8', errors='ignore')
         if not chunk:
             return
+        # If we've reached the cap, stop this source early to keep things snappy
+        try:
+            if self.search_results.topLevelItemCount() >= self._search_max_items:
+                if proc.state() != QProcess.NotRunning:
+                    proc.kill(); proc.waitForFinished(100)
+                # Mark done for this source; completion handler will flip sorting and repaint
+                if not self._search_done.get(source, True):
+                    self._search_done[source] = True
+                    self._search_truncated = True
+                    try:
+                        if hasattr(self, 'see_more_button'):
+                            self.see_more_button.setVisible(True)
+                    except Exception:
+                        pass
+                    if all(self._search_done.values()):
+                        self._search_one_finished(source)
+                return
+        except Exception:
+            pass
         self._search_pending[source] += chunk
         lines = self._search_pending[source].split('\n')
         self._search_pending[source] = lines.pop()  # keep last partial line
@@ -962,7 +1586,24 @@ class YayGUI(QWidget):
                 continue
             # Stop adding if we hit cap to keep UI responsive
             if self.search_results.topLevelItemCount() >= self._search_max_items:
-                continue
+                # Mark truncated and surface the See more button right away
+                try:
+                    self._search_truncated = True
+                    if hasattr(self, 'see_more_button'):
+                        self.see_more_button.setVisible(True)
+                except Exception:
+                    pass
+                # Stop this source immediately
+                try:
+                    if proc.state() != QProcess.NotRunning:
+                        proc.kill(); proc.waitForFinished(100)
+                    if not self._search_done.get(source, True):
+                        self._search_done[source] = True
+                        if all(self._search_done.values()):
+                            self._search_one_finished(source)
+                except Exception:
+                    pass
+                return
             m = self._search_header_re.match(line)
             if m:
                 # finalize previous (nothing special needed)
@@ -991,6 +1632,12 @@ class YayGUI(QWidget):
                 it.setData(1, Qt.UserRole, p)
                 src = 'Yay' if (p['repo'] or '').lower() == 'aur' else 'Pacman'
                 it.setText(3, src)
+                # Restore checked state if we are expanding results
+                try:
+                    if p['name'] in (getattr(self, '_preserve_checked_names', set()) or set()):
+                        it.setCheckState(0, Qt.Checked)
+                except Exception:
+                    pass
                 # Apply source filter immediately
                 sel = self.search_source_filter.currentText() if hasattr(self, 'search_source_filter') else 'All'
                 if sel in ('Pacman', 'Yay') and src != sel:
@@ -1019,9 +1666,43 @@ class YayGUI(QWidget):
             if count == 0:
                 self.status_bar.showMessage('No packages found.')
             else:
-                self.status_bar.showMessage(f'Found {count} package(s).')
+                msg = f'Found {count} package(s).'
+                if getattr(self, '_search_truncated', False):
+                    msg += ' (truncated)'
+                self.status_bar.showMessage(msg)
             self.search_results.setSortingEnabled(True)
             self._active_search_procs = []
+            # Re-enable updates and repaint once after bulk insert
+            try:
+                self.search_results.setUpdatesEnabled(True)
+                self.search_results.viewport().update()
+            except Exception:
+                pass
+            # If truncated, offer to load more
+            try:
+                if getattr(self, '_search_truncated', False):
+                    self.see_more_button.setVisible(True)
+            except Exception:
+                pass
+
+    def _see_more_clicked(self):
+        # Expand page and re-run search, preserving current checked selections
+        names = []
+        try:
+            for i in range(self.search_results.topLevelItemCount()):
+                it = self.search_results.topLevelItem(i)
+                if it.checkState(0) == Qt.Checked:
+                    names.append(it.text(1))
+        except Exception:
+            pass
+        try:
+            self._search_page = int(getattr(self, '_search_page', 1)) + 1
+        except Exception:
+            self._search_page = 2
+        term = getattr(self, '_last_search_term', None) or self.search_input.text().strip()
+        if not term:
+            return
+        self._start_search(term, preserve_checked=set(names))
 
     # Apply source filter to search results
     def _apply_search_filter(self, *_):
@@ -1049,6 +1730,11 @@ class YayGUI(QWidget):
         self._active_inst_procs = []
         self.installed_view.clear()
         self.installed_view.setSortingEnabled(False)
+        try:
+            if hasattr(self, 'installed_select_all_cb'):
+                self.installed_select_all_cb.setChecked(False)
+        except Exception:
+            pass
         self.installed_status.showMessage('Loading installed packages...')
         self._installed_count = 0
         self._installed_done_native = False
@@ -1140,7 +1826,8 @@ class YayGUI(QWidget):
                 it.setCheckState(0, Qt.Unchecked)
                 it.setText(1, parts[0])
                 it.setText(2, parts[1])
-                it.setText(3, self._inst_source_by_proc.get(proc, ''))
+                src_label = self._inst_source_by_proc.get(proc, '')
+                it.setText(3, src_label)
                 self._installed_count += 1
         if which == 'native':
             self._installed_done_native = True
@@ -1283,6 +1970,11 @@ class YayGUI(QWidget):
                 self.update_status.showMessage(f'Found {total} update(s): {self._repo_count} repo, {self._aur_count} AUR.')
             # Re-enable sorting now that we are done
             self.updates_view.setSortingEnabled(True)
+            try:
+                title = 'Update' if total <= 0 else f'Update ({total})'
+                self.tabs.setTabText(self.update_tab_index, title)
+            except Exception:
+                pass
 
     def _filter_updates_list(self, text):
         q = (text or '').strip().lower()
@@ -1308,6 +2000,14 @@ class YayGUI(QWidget):
         state = Qt.Checked if checked else Qt.Unchecked
         for i in range(self.updates_view.topLevelItemCount()):
             it = self.updates_view.topLevelItem(i)
+            if not it.isHidden():
+                it.setCheckState(0, state)
+
+    def _toggle_select_all_installed(self, checked: bool):
+        # Toggle selection for all visible rows in the Installed tab
+        state = Qt.Checked if checked else Qt.Unchecked
+        for i in range(self.installed_view.topLevelItemCount()):
+            it = self.installed_view.topLevelItem(i)
             if not it.isHidden():
                 it.setCheckState(0, state)
 
