@@ -7,18 +7,14 @@
   [![last-commit](https://img.shields.io/github/last-commit/ahmoodio/yay-gui-manager?style=flat&logo=git&logoColor=white&color=0080ff)](https://github.com/ahmoodio/yay-gui-manager)
   [![repo-top-language](https://img.shields.io/github/languages/top/ahmoodio/yay-gui-manager?style=flat&color=0080ff)](https://github.com/ahmoodio/yay-gui-manager)
   [![license](https://img.shields.io/github/license/ahmoodio/yay-gui-manager?style=flat&color=0080ff)](https://github.com/ahmoodio/yay-gui-manager/blob/main/LICENSE)
-
+[![Arch Linux](https://img.shields.io/badge/Arch%20Linux-blue?logo=arch-linux\&logoColor=white)](https://archlinux.org/)
+[![AUR Helper: yay](https://img.shields.io/badge/AUR%20Helper-yay-success?logo=arch-linux\&logoColor=white)](https://github.com/Jguer/yay)
+  
   <p><em>Built with:</em></p>
   <img alt="Python" src="https://img.shields.io/badge/Python-3776AB.svg?style=flat&logo=Python&logoColor=white">
   <img alt="GNU Bash" src="https://img.shields.io/badge/GNU%20Bash-4EAA25.svg?style=flat&logo=GNU-Bash&logoColor=white">
   <img alt="Qt" src="https://img.shields.io/badge/Qt-41CD52.svg?style=flat&logo=Qt&logoColor=white">
 
-
-  <p><em>Made for</em></p>
-
-[![Arch Linux](https://img.shields.io/badge/Arch%20Linux-blue?logo=arch-linux\&logoColor=white)](https://archlinux.org/)
-[![AUR Helper: yay](https://img.shields.io/badge/AUR%20Helper-yay-success?logo=arch-linux\&logoColor=white)](https://github.com/Jguer/yay)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 </div>
  🎥 Demo GIFs
 
