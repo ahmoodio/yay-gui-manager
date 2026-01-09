@@ -20,7 +20,7 @@
 [![AUR Helper: yay](https://img.shields.io/badge/AUR%20Helper-yay-success?logo=arch-linux\&logoColor=white)](https://github.com/Jguer/yay)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 </div>
-# 🎥 Demo GIFs
+ 🎥 Demo GIFs
 
 ### 🔍 Search & Install  
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
