@@ -1,5 +1,7 @@
-# YAY-GUI-MANAGER
 
+<div align="center">
+# YAY-GUI-MANAGER
+</div>
 <div align="center">
   <img src="https://files.catbox.moe/kd0wv5.png" alt="Yay GUI Manager logo" width="180"/>
   <p><em>Streamlining Package Management with Effortless Control</em></p>
