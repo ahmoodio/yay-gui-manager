@@ -54,14 +54,16 @@
 
 # 📥 Installation (Arch / CachyOS)
 
+Easiest most forward way is using (yay):
+```bash
+yay -S yay-gui-manager-git
+```
+
+
 Install runtime dependencies from pacman (no pip required):
 
 ```bash
 sudo pacman -Syu --needed python python-pyqt5 yay git base-devel
-```
-Easiest most forward way is using (yay):
-```bash
-yay -S yay-gui-manager-git
 ```
 
 Then clone and run:
