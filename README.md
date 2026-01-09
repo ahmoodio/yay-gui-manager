@@ -14,8 +14,11 @@
   <img alt="Qt" src="https://img.shields.io/badge/Qt-41CD52.svg?style=flat&logo=Qt&logoColor=white">
 </div>
 
-
-
+  <p><em>Made for</em></p>
+  [![Arch Linux](https://img.shields.io/badge/Arch%20Linux-blue?logo=arch-linux\&logoColor=white)](https://archlinux.org/)
+[![Polybar](https://img.shields.io/badge/Polybar-black?logo=polybar\&logoColor=white)](https://github.com/polybar/polybar)
+[![AUR Helper: yay](https://img.shields.io/badge/AUR%20Helper-yay-success?logo=arch-linux\&logoColor=white)](https://github.com/Jguer/yay)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 # 🎥 Demo GIFs
 
 ### 🔍 Search & Install  
