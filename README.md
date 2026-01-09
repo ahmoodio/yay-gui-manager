@@ -135,17 +135,6 @@ The <code>requirements</code> file is minimal and only lists <code>PyQt5</code>.
 
 ---
 
-# 📦 AUR Packaging (yay-gui-manager-git)
-
-This repo can be packaged for the AUR using the provided <code>PKGBUILD</code> and <code>yay-gui-manager-git.install</code>.  
-The package installs:
-
-- <code>/usr/bin/yay-gui-manager</code> → wrapper for <code>yay_gui.py</code>
-- <code>/usr/share/applications/yay-gui.desktop</code>
-- <code>/usr/share/icons/hicolor/256x256/apps/yay-gui.png</code> (you must provide the PNG when packaging)
-- License under <code>/usr/share/licenses/yay-gui-manager-git/</code>
-
----
 
 # 📄 License
 
