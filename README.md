@@ -1,12 +1,18 @@
-<p align="center">
+# YAY-GUI-MANAGER
+
+<div align="center">
   <img src="https://files.catbox.moe/kd0wv5.png" alt="Yay GUI Manager logo" width="180"/>
-</p>
+  <p><em>Streamlining Package Management with Effortless Control</em></p>
 
-<h1 align="center">Yay GUI Manager – Rebuilt</h1>
+  [![last-commit](https://img.shields.io/github/last-commit/ahmoodio/yay-gui-manager?style=flat&logo=git&logoColor=white&color=0080ff)](https://github.com/ahmoodio/yay-gui-manager)
+  [![repo-top-language](https://img.shields.io/github/languages/top/ahmoodio/yay-gui-manager?style=flat&color=0080ff)](https://github.com/ahmoodio/yay-gui-manager)
+  [![license](https://img.shields.io/github/license/ahmoodio/yay-gui-manager?style=flat&color=0080ff)](https://github.com/ahmoodio/yay-gui-manager/blob/main/LICENSE)
 
-A <strong>fast</strong>, <strong>modern</strong>, and <strong>Konsole-integrated</strong> GUI for the <code>yay</code> AUR helper.  
-Built with <strong>Python + PyQt5</strong>, with real-time streaming parsing for search, installed packages, and updates.
-
+  <p><em>Built with:</em></p>
+  <img alt="Python" src="https://img.shields.io/badge/Python-3776AB.svg?style=flat&logo=Python&logoColor=white">
+  <img alt="GNU Bash" src="https://img.shields.io/badge/GNU%20Bash-4EAA25.svg?style=flat&logo=GNU-Bash&logoColor=white">
+  <img alt="Qt" src="https://img.shields.io/badge/Qt-41CD52.svg?style=flat&logo=Qt&logoColor=white">
+</div>
 ---
 
 
