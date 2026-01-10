@@ -15,52 +15,67 @@
   <img alt="GNU Bash" src="https://img.shields.io/badge/GNU%20Bash-4EAA25.svg?style=flat&logo=GNU-Bash&logoColor=white">
   <img alt="Qt" src="https://img.shields.io/badge/Qt-41CD52.svg?style=flat&logo=Qt&logoColor=white">
 
+  <p>
+    <a href="#-demo-gifs">🎥 Demos</a> •
+    <a href="#-features">✨ Features</a> •
+    <a href="#-installation-arch--cachyos">📥 Installation</a> •
+    <a href="#-desktop-launcher">🎛️ Desktop Launcher</a> •
+    <a href="#-support">⭐ Support</a>
+  </p>
 </div>
- 🎥 Demo GIFs
 
-### 🔍 Search & Install  
+---
+</div>
+
+## 🎥 Demo GIFs
+
+### 🔍 [Search & Install](https://files.catbox.moe/2izcwr.gif)
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
 ![Search Demo](https://files.catbox.moe/2izcwr.gif)
 
 ---
 
-### 📦 Installed Packages  
+### 📦 [Installed Packages](https://files.catbox.moe/w32hbc.gif)
 <em>Explicitly installed packages (pacman -Qe) with filter + batch uninstall.</em>  
 ![Installed Tab](https://files.catbox.moe/w32hbc.gif)
 
 ---
 
-### 🔄 Updates Tab  
+### 🔄 [Updates Tab](https://files.catbox.moe/u0i2h2.gif)
 <em>Repo + AUR updates (yay -Qu / -Qua) with batch update tools.</em>  
 ![Updates Tab](https://files.catbox.moe/u0i2h2.gif)
+
+<p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
 
 ---
 
 # ✨ Features
 
-- 3 main tabs:
-  - <strong>Search & Install</strong> – uses <code>pacman -Ss</code> and <code>yay -Ss --aur</code>
-  - <strong>Installed</strong> – uses <code>pacman -Qe</code> to list explicitly installed packages
-  - <strong>Updates</strong> – uses <code>yay -Qu</code> and <code>yay -Qua</code>
-- Multi-select install / uninstall / update using checkboxes
-- Package details panel with description and URL (<code>pacman -Si</code>, <code>yay -Si --aur</code>)
-- External terminal integration:
-  - Prefers Konsole
+- **3 main tabs:**
+  - **Search & Install** – uses `pacman -Ss` and `yay -Ss --aur`
+  - **Installed** – uses `pacman -Qe` to list explicitly installed packages
+  - **Updates** – uses `yay -Qu` and `yay -Qua`
+- **Multi-select:** Install / uninstall / update using checkboxes
+- **Package details:** Side panel with description and URL (`pacman -Si`, `yay -Si --aur`)
+- **External terminal integration:**
+  - Prefers **Konsole**
   - Falls back to kitty / xfce4-terminal / gnome-terminal / tilix / xterm / wezterm / kgx / foot
-- Optional “keep Konsole open after command finishes”
-- Crash log written to <code>/tmp/yay_gui_error.log</code>
+- **Session Control:** Optional “keep Konsole open after command finishes”
+- **Debugging:** Crash log written to `/tmp/yay_gui_error.log`
+
+<p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
 
 ---
 
-# 📥 Installation (Arch / CachyOS)
+# 📥 Installation ([Arch](https://archlinux.org/) / [CachyOS](https://cachyos.org/))
 
-Easiest most forward way is using (yay):
+Easiest most forward way is using [yay](https://github.com/Jguer/yay):
 ```bash
 yay -S yay-gui-manager-git
 ```
+### Or you can do it manualy:
 
-
-Install runtime dependencies from pacman (no pip required):
+Install runtime dependencies from [pacman](https://wiki.archlinux.org/title/Pacman) (no pip required):
 
 ```bash
 sudo pacman -Syu --needed python python-pyqt5 yay git base-devel
@@ -74,18 +89,19 @@ cd yay-gui-manager
 python yay_gui.py
 ```
 
-Or make it executable:
+Make it executable:
 
 ```bash
 chmod +x yay_gui.py
 ./yay_gui.py
 ```
+<p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
 
----
+
 
 # 🎛️ Desktop Launcher
 
-To have <strong>Yay GUI Manager</strong> appear in your app menu:
+To have <strong>[Yay GUI Manager](https://github.com/ahmoodio/yay-gui-manager/)</strong> appear in your app menu:
 
 ### Automatic (recommended)
 
@@ -116,11 +132,12 @@ cp desktop/yay-gui.desktop ~/.local/share/applications/
 cp desktop/yay-gui.png ~/.local/share/icons/hicolor/256x256/apps/
 ```
 
----
 
-# 🧩 Development (Optional venv)
 
-If you prefer to use a virtual environment and pip:
+
+# 🧩 Development (Optional [venv](https://docs.python.org/3/library/venv.html))
+
+If you prefer to use a virtual environment and [pip](https://pypi.org/project/pip/):
 
 ```bash
 python -m venv .venv
@@ -133,17 +150,22 @@ The <code>requirements</code> file is minimal and only lists <code>PyQt5</code>.
 
 > ⚠️ On Arch, avoid using system-wide <code>pip</code> due to PEP 668. Prefer pacman for system packages.
 
----
+<p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
+
+
 
 
 # 📄 License
 
-MIT License. See <code>LICENSE</code>.
+MIT License. See <code>[LICENSE](https://github.com/ahmoodio/yay-gui-manager/blob/main/LICENSE)</code>.
 
----
+<p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
+
+
+
 
 # ⭐ Support
 
 If you find this useful, please ⭐ the repo and share feedback / PRs.
 
-
+<p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
