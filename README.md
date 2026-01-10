@@ -51,20 +51,16 @@
 
 # ✨ Features
 
-- **3 main tabs:**
-  - **Search & Install** – uses `pacman -Ss` and `yay -Ss --aur`
-  - **Installed** – uses `pacman -Qe` to list explicitly installed packages
-  - **Updates** – uses `yay -Qu` and `yay -Qua`
-- **Multi-select:** Install / uninstall / update using checkboxes
-- **Package details:** Side panel with description and URL (`pacman -Si`, `yay -Si --aur`)
-- **External terminal integration:**
-  - Prefers **Konsole**
-  - Falls back to kitty / xfce4-terminal / gnome-terminal / tilix / xterm / wezterm / kgx / foot
-- **Session Control:** Optional “keep Konsole open after command finishes”
-- **Debugging:** Crash log written to `/tmp/yay_gui_error.log`
+- **Unified Package Engine:** Full support for official repo packages (`pacman`) and community packages (`yay/AUR`).
+- **Auto-Update Checker:** Live tracking of repo and AUR updates without manual refreshes.
+- **Side-Panel Details:** Instant access to package descriptions, versions, and source URLs (`pacman -Si` / `yay -Si`).
+- **Smart Terminal Integration:** - Automatically detects your terminal (Konsole, Kitty, Alacritty, Tilix, etc.).
+  - **New Execution Toggle**: Choose to keep the terminal open after a task finishes for easier debugging.
+- **Batch Processing:** Multi-select checkboxes for high-speed maintenance and bulk uninstalls.
+- **Customizable UI:** Personalize the app with custom accent colors and theme management via the new Settings tab.
+- **Error Logging:** System crashes or execution errors are logged to `/tmp/yay_gui_error.log`.
 
 <p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
-
 ---
 
 # 📥 Installation ([Arch](https://archlinux.org/) / [CachyOS](https://cachyos.org/))
