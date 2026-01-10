@@ -29,21 +29,21 @@
 
 ## 🎥 Demo GIFs
 
-### 🔍 [Search & Install](https://files.catbox.moe/5pgjb0.gif)
+### 🔍 [Search & Install](https://files.catbox.moe/2izcwr.gif)
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
-![Search Demo](https://files.catbox.moe/5pgjb0.gif)
+![Search Demo](https://files.catbox.moe/2izcwr.gif)
 
 ---
 
-### 📦 [Installed Packages](https://files.catbox.moe/007u0w.gif)
+### 📦 [Installed Packages](https://files.catbox.moe/w32hbc.gif)
 <em>Explicitly installed packages (pacman -Qe) with filter + batch uninstall.</em>  
-![Installed Tab](https://files.catbox.moe/007u0w.gif)
+![Installed Tab](https://files.catbox.moe/w32hbc.gif)
 
 ---
 
-### 🔄 [Updates Tab](https://files.catbox.moe/007u0w.gif)
+### 🔄 [Updates Tab](https://files.catbox.moe/u0i2h2.gif)
 <em>Repo + AUR updates (yay -Qu / -Qua) with batch update tools.</em>  
-![Updates Tab](https://files.catbox.moe/007u0w.gif)
+![Updates Tab](https://files.catbox.moe/u0i2h2.gif)
 
 <p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
 
