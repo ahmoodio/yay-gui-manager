@@ -145,3 +145,19 @@ MIT License. See <code>LICENSE</code>.
 # ⭐ Support
 
 If you find this useful, please ⭐ the repo and share feedback / PRs.
+
+### 🔗 Quick Links
+* [Main Repository](https://github.com/ahmoodio/yay-gui-manager)
+* [Features Section](https://github.com/ahmoodio/yay-gui-manager#features)
+* [Requirements & Dependencies](https://github.com/ahmoodio/yay-gui-manager#requirements)
+* [Installation Steps](https://github.com/ahmoodio/yay-gui-manager#installation)
+
+### 🎥 Visual Guides
+* [Application Preview Image](https://github.com/ahmoodio/yay-gui-manager/blob/main/assets/preview.png)
+* [Installation GIF](https://github.com/ahmoodio/yay-gui-manager/blob/main/assets/install_demo.gif)
+* [Search & Usage GIF](https://github.com/ahmoodio/yay-gui-manager/blob/main/assets/search_demo.gif)
+
+### 🛠 Technical Files
+* [View Source (main.py)](https://github.com/ahmoodio/yay-gui-manager/blob/main/main.py)
+* [Requirements List](https://github.com/ahmoodio/yay-gui-manager/blob/main/requirements.txt)
+* [License](https://github.com/ahmoodio/yay-gui-manager/blob/main/LICENSE)
