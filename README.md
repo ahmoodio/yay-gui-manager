@@ -29,9 +29,9 @@
 
 ## 🎥 Demo GIFs
 
-### 🔍 [Search & Install](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NyOGoyMWNxNWI4bXVxeXR5ODJpcmp0anVieGg5amE5ZzYxbDh3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pP7TSW99nm0f12gvKX/giphy.gif)
+### 🔍 [Search & Install](https://files.catbox.moe/4f6ban.gif)
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
-![Search Demo](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NyOGoyMWNxNWI4bXVxeXR5ODJpcmp0anVieGg5amE5ZzYxbDh3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pP7TSW99nm0f12gvKX/giphy.gif)
+![Search Demo](https://files.catbox.moe/4f6ban.gif)
 
 ---
 
