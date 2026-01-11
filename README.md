@@ -35,15 +35,15 @@
 
 ---
 
-### 📦 [Installed Packages](https://files.catbox.moe/w32hbc.gif)
+### 📦 [Installed Packages](https://files.catbox.moe/lzuher.gif)
 <em>Explicitly installed packages (pacman -Qe) with filter + batch uninstall.</em>  
-![Installed Tab](https://files.catbox.moe/w32hbc.gif)
+![Installed Tab](https://files.catbox.moe/lzuher.gif)
 
 ---
 
-### 🔄 [Updates Tab](https://files.catbox.moe/u0i2h2.gif)
+### 🔄 [Updates Tab](https://files.catbox.moe/007u0w.gif)
 <em>Repo + AUR updates (yay -Qu / -Qua) with batch update tools.</em>  
-![Updates Tab](https://files.catbox.moe/u0i2h2.gif)
+![Updates Tab](https://files.catbox.moe/007u0w.gif)
 
 <p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
 
