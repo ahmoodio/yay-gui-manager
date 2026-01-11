@@ -29,15 +29,15 @@
 
 ## 🎥 Demo GIFs
 
-### 🔍 [Search & Install](https://imgur.com/a/IShvz3K)
+### 🔍 [Search & Install](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NyOGoyMWNxNWI4bXVxeXR5ODJpcmp0anVieGg5amE5ZzYxbDh3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pP7TSW99nm0f12gvKX/giphy.gif)
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
-![Search Demo](https://imgur.com/a/IShvz3K)
+![Search Demo](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NyOGoyMWNxNWI4bXVxeXR5ODJpcmp0anVieGg5amE5ZzYxbDh3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pP7TSW99nm0f12gvKX/giphy.gif)
 
 ---
 
-### 📦 [Installed Packages](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NyOGoyMWNxNWI4bXVxeXR5ODJpcmp0anVieGg5amE5ZzYxbDh3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pP7TSW99nm0f12gvKX/giphy.gif)
+### 📦 [Installed Packages](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDJwcGVzaXl4c255OWtudWticHZjcW5lcGgxM245MG4wNW02YWs3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YIF35GRLqclOYHGWs7/giphy.gif)
 <em>Explicitly installed packages (pacman -Qe) with filter + batch uninstall.</em>  
-![Installed Tab](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NyOGoyMWNxNWI4bXVxeXR5ODJpcmp0anVieGg5amE5ZzYxbDh3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pP7TSW99nm0f12gvKX/giphy.gif)
+![Installed Tab](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDJwcGVzaXl4c255OWtudWticHZjcW5lcGgxM245MG4wNW02YWs3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YIF35GRLqclOYHGWs7/giphy.gif)
 
 ---
 
