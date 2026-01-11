@@ -29,15 +29,15 @@
 
 ## 🎥 Demo GIFs
 
-### 🔍 [Search & Install](https://files.catbox.moe/4f6ban.gif)
+### 🔍 [Search & Install](https://files.catbox.moe/mekaqd.gif)
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
-![Search Demo](https://files.catbox.moe/4f6ban.gif)
+![Search Demo](https://files.catbox.moe/mekaqd.gif)
 
 ---
 
-### 📦 [Installed Packages](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDJwcGVzaXl4c255OWtudWticHZjcW5lcGgxM245MG4wNW02YWs3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YIF35GRLqclOYHGWs7/giphy.gif)
+### 📦 [Installed Packages](https://files.catbox.moe/5wbhig.gif)
 <em>Explicitly installed packages (pacman -Qe) with filter + batch uninstall.</em>  
-![Installed Tab](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDJwcGVzaXl4c255OWtudWticHZjcW5lcGgxM245MG4wNW02YWs3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/YIF35GRLqclOYHGWs7/giphy.gif)
+![Installed Tab](https://files.catbox.moe/5wbhig.gif)
 
 ---
 
