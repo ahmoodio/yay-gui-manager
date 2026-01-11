@@ -45,6 +45,10 @@
 <em>Repo + AUR updates (yay -Qu / -Qua) with batch update tools.</em>  
 ![Updates Tab](https://files.catbox.moe/007u0w.gif)
 
+---
+
+### ⚙️ [Settings Tab](https://files.catbox.moe/m595f0.gif)
+<em>Change Theme + Results cap and more.</em>
 <p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
 
 ---
