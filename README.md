@@ -49,8 +49,10 @@
 
 ### ⚙️ [Settings Tab](https://files.catbox.moe/m595f0.gif)
 <em>Change Theme + Results cap and more.</em>
-<p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
 ![Settings Tab](https://files.catbox.moe/m595f0.gif)
+
+<p align="right"><a href="#top"><b>↑ Back to Top</b></a></p>
+
 
 ---
 
