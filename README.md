@@ -35,9 +35,9 @@
 
 ---
 
-### 📦 [Installed Packages](https://files.catbox.moe/lzuher.gif)
+### 📦 [Installed Packages](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NyOGoyMWNxNWI4bXVxeXR5ODJpcmp0anVieGg5amE5ZzYxbDh3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pP7TSW99nm0f12gvKX/giphy.gif)
 <em>Explicitly installed packages (pacman -Qe) with filter + batch uninstall.</em>  
-![Installed Tab](https://files.catbox.moe/lzuher.gif)
+![Installed Tab](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2NyOGoyMWNxNWI4bXVxeXR5ODJpcmp0anVieGg5amE5ZzYxbDh3OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/pP7TSW99nm0f12gvKX/giphy.gif)
 
 ---
 
