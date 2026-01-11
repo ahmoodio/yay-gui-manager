@@ -29,9 +29,9 @@
 
 ## 🎥 Demo GIFs
 
-### 🔍 [Search & Install](https://files.catbox.moe/iopqhb.gif)
+### 🔍 [Search & Install](https://imgur.com/a/IShvz3K)
 <em>Search both repo + AUR and view descriptions in a side panel.</em>  
-![Search Demo](https://files.catbox.moe/iopqhb.gif)
+![Search Demo](https://imgur.com/a/IShvz3K)
 
 ---
 
